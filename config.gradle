@@ -11,7 +11,7 @@ ext {
             targetSdkVersion : 25,
             applicationId    : "com.wustor.imagehelper",
             versionCode      : 1,
-            versionName      : "1.6.3"
+            versionName      : "1.1.0"
 
     ]
 
