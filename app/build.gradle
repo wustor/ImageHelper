@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 def cfg = rootProject.ext.android
-def librarys = rootProject.ext.Dependencies
+def librarys = rootProject.ext.dependencies
 
 android {
     compileSdkVersion cfg.compileSdkVersion
@@ -23,9 +23,6 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile librarys["V7"]
-    compile librarys["constraint"]
-    compile librarys["junit"]
-    compile librarys["test"]
-    compile librarys["espresso"]
+    librarys.each { k, v -> compile v }
+    compile project(':helper')
 }

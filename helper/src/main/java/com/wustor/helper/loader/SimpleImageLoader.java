@@ -61,7 +61,7 @@ public class SimpleImageLoader {
      * @param uri       http:   file 开头
      */
     public void displayImage(Context context, ImageView imageView, String uri) {
-        displayImage(context, imageView, uri, null, null);
+        displayImage(context, imageView, uri, getInstance().getConfig().getDisplayConfig(), null);
     }
 
     /**
