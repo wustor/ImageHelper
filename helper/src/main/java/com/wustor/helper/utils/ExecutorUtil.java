@@ -1,15 +1,14 @@
-package com.wustor.helper.executor;
+package com.wustor.helper.utils;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 /**
@@ -17,17 +16,13 @@ import java.util.regex.Pattern;
  * created on 2017/6/20
  * email fat_chao@163.com.
  */
-public class ConcurrentUtil {
-    private static final String TAG = ConcurrentUtil.class.getSimpleName();
+public class ExecutorUtil {
+    private static final String TAG = ExecutorUtil.class.getSimpleName();
 
     private static final String PATH_CPU = "/sys/devices/system/cpu/";
     private static final String CPU_FILTER = "cpu[0-9]+";
     private static int CPU_CORES = 0;
 
-    public static String formatDate(long millis) {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return format.format(new Date(millis));
-    }
 
     /**
      * Get available processors.
@@ -77,29 +72,23 @@ public class ConcurrentUtil {
         return CPU_CORES;
     }
 
-    public static AlertDialog.Builder dialogBuilder(Context context, String title, String msg) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        if (msg != null) {
-            builder.setMessage(msg);
-        }
-        if (title != null) {
-            builder.setTitle(title);
-        }
-        return builder;
+    public static ThreadPoolExecutor createThreadPool() {
+        // 控制最多4个keep在pool中
+        int corePoolSize = Math.min(4, ExecutorUtil.getCoresNumbers());
+        return new ThreadPoolExecutor(
+                corePoolSize,
+                Integer.MAX_VALUE,
+                5, TimeUnit.SECONDS,
+                new SynchronousQueue<Runnable>(),
+                new ThreadFactory() {
+                    static final String NAME = "wustor";
+                    AtomicInteger IDS = new AtomicInteger(1);
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        return new Thread(r, NAME + IDS.getAndIncrement());
+                    }
+                },
+                new ThreadPoolExecutor.DiscardPolicy());
     }
 
-
-    public static Dialog showTips(Context context, String title, String des) {
-        return showTips(context, title, des, null, null);
-    }
-
-    public static Dialog showTips(Context context, String title, String des, String btn, DialogInterface.OnDismissListener dismissListener) {
-        AlertDialog.Builder builder = dialogBuilder(context, title, des);
-        builder.setCancelable(true);
-        builder.setPositiveButton(btn, null);
-        Dialog dialog = builder.show();
-        dialog.setCanceledOnTouchOutside(true);
-        dialog.setOnDismissListener(dismissListener);
-        return dialog;
-    }
 }

@@ -5,47 +5,23 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 
-import com.wustor.helper.cache.DoubleCache;
-import com.wustor.helper.config.ImageLoaderConfig;
-import com.wustor.helper.loader.SimpleImageLoader;
-import com.wustor.helper.policy.ReversePolicy;
+import com.wustor.helper.ImageHelper;
 
 public class MainActivity extends AppCompatActivity {
 
     private Context mContext;
     private ImageView ivDemo;
-    private String url = "http://7xi8d6.com1.z0.glb.clouddn.com/20171206084331_wylXWG_misafighting_6_12_2017_8_43_16_390.jpeg";
+    private String url = "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1515000362638&di=e5733da1d8534b6d2161b68a625d8171&imgtype=0&src=http%3A%2F%2Fd.hiphotos.baidu.com%2Fimage%2Fpic%2Fitem%2F83025aafa40f4bfb8862debb094f78f0f63618aa.jpg";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mContext = this;
-        initView();
-        initData();
-
-    }
-
-
-    private void initView() {
         ivDemo = (ImageView) findViewById(R.id.iv_demo);
+        ImageHelper.getInstance(this).setConfig(R.mipmap.ic_launcher, R.mipmap.ic_launcher).displayImage(ivDemo, url);
 
     }
 
-    private void initData() {
-        //配置
-        SimpleImageLoader imageLoader = SimpleImageLoader.getInstance();
-        if (imageLoader == null) {
-            ImageLoaderConfig.Builder build = new ImageLoaderConfig.Builder();
-            build.setThreadCount(5) //线程数量
-                    .setLoadPolicy(new ReversePolicy()) //加载策略
-                    .setCachePolicy(new DoubleCache(mContext)) //缓存策略
-                    .setLoadingImage(R.mipmap.ic_launcher)
-                    .setFailedImage(R.mipmap.ic_launcher);
-            ImageLoaderConfig config = build.build();
-            imageLoader = SimpleImageLoader.getInstance(config);
-        }
-////        初始化
-        imageLoader.displayImage(mContext, ivDemo, url);
-    }
+
 }
