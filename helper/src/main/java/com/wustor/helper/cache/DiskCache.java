@@ -16,17 +16,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-/**
- * Created by Administrator on 2017/2/6 0006.
- */
 
 public class DiskCache implements BitmapCache {
     private static DiskCache mDiskCache;
-    //缓存路径
-    private String mCacheDir = "cmyy";
-    //MB
     private static final int MB = 1024 * 1024;
-    //jackwharton的杰作
     private DiskLruCache mDiskLruCache;
 
     private DiskCache(Context context) {
@@ -54,7 +47,7 @@ public class DiskCache implements BitmapCache {
             //外部存储不可用
             cachePath = context.getCacheDir().getPath();
         }
-        File directory = new File(cachePath, "cmyy");
+        File directory = new File(cachePath, "wustor");
         if (!directory.exists()) {
             boolean is = directory.mkdir();
             Log.d("is---->", String.valueOf(is));

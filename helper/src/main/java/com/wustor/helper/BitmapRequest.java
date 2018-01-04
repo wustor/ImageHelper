@@ -9,8 +9,9 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.wustor.helper.cache.BitmapCache;
+import com.wustor.helper.cache.CacheManager;
 import com.wustor.helper.config.DisplayConfig;
+import com.wustor.helper.config.LoadListener;
 import com.wustor.helper.utils.BitmapDecoder;
 import com.wustor.helper.utils.ImageViewHelper;
 import com.wustor.helper.utils.MD5Utils;
@@ -30,11 +31,11 @@ public class BitmapRequest implements Runnable {
     private String imageUriMD5;
     private DisplayConfig displayConfig;
     private WeakReference<ImageView> imageViewSoft;
-    public ImageHelper.ImageListener imageListener;
+    private LoadListener loadListener;
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
 
-    public BitmapRequest(Context context, ImageView imageView, String imageUrl, DisplayConfig displayConfig, ImageHelper.ImageListener imageListener) {
+    public BitmapRequest(Context context, ImageView imageView, String imageUrl, DisplayConfig displayConfig, LoadListener loadListener) {
         this.imageViewSoft = new WeakReference<>(imageView);
         imageView.setTag(imageUrl);
         this.imageUrl = imageUrl;
@@ -43,7 +44,7 @@ public class BitmapRequest implements Runnable {
         if (displayConfig != null) {
             this.displayConfig = displayConfig;
         }
-        this.imageListener = imageListener;
+        this.loadListener = loadListener;
 
     }
 
@@ -51,8 +52,8 @@ public class BitmapRequest implements Runnable {
     @Override
     public void run() {
         //加载BitMap
-        BitmapCache bitmapCache = ImageHelper.getInstance(mContext).getConfig().getBitmapCache();
-        Bitmap bitmap = bitmapCache.get(getImageUriMD5());
+        CacheManager cacheManager = ImageHelper.getInstance(mContext).getConfig().getCacheManager();
+        Bitmap bitmap = cacheManager.getFromDisk(getImageUriMD5());
         if (bitmap == null) {
             bitmap = onLoad(mContext);
             cacheBitmap(bitmap);
@@ -149,26 +150,22 @@ public class BitmapRequest implements Runnable {
     }
 
     private void updateImageView(Bitmap bitmap) {
-        //加载正常  防止图片错位
         if (bitmap != null && getImageView().getTag().equals(getImageUrl())) {
             getImageView().setImageBitmap(bitmap);
         }
-        //有可能加载失败
-        if (bitmap == null && displayConfig != null && displayConfig.faildImage != -1) {
-            getImageView().setImageResource(displayConfig.faildImage);
+        if (bitmap == null && displayConfig != null && displayConfig.failedImage != -1) {
+            getImageView().setImageResource(displayConfig.failedImage);
         }
-        //监听
-        //回调 给圆角图片  特殊图片进行扩展
-        if (imageListener != null) {
-            imageListener.onComplete(getImageView(), bitmap, getImageUrl());
+        if (loadListener != null) {
+            loadListener.load(getImageUrl(), "failed");
         }
     }
 
     private void cacheBitmap(Bitmap bitmap) {
         if (bitmap != null) {
             synchronized (BitmapRequest.class) {
-                BitmapCache bitmapCache = ImageHelper.getInstance(mContext).getConfig().getBitmapCache();
-                bitmapCache.put(getImageUrl(), bitmap);
+                CacheManager cacheManager = ImageHelper.getInstance(mContext).getConfig().getCacheManager();
+                cacheManager.put(getImageUriMD5(), bitmap);
             }
         }
     }

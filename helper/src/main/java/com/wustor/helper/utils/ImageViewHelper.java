@@ -10,16 +10,6 @@ public class ImageViewHelper {
     private static int DEFAULT_WIDTH = 200;
     private static int DEFAULT_HEIGHT = 200;
 
-    /**
-     * 获取ImageView控件的宽度
-     * 1.getWidth（绘制完成，如果视图没有绘制完成没有值）
-     * 2.layout_width（有可能设置的是WRAP_CONTENT）
-     * 3.maxWidth
-     * 拿到ImageView的宽高
-     *
-     * @param imageView
-     * @return
-     */
     public static int getImageViewWidth(final ImageView imageView) {
         if (imageView != null) {
             ViewGroup.LayoutParams params = imageView.getLayoutParams();

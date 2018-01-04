@@ -24,24 +24,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
-/**
- * Buffers input from an {@link InputStream} for reading lines.
- *
- * <p>This class is used for buffered reading of lines. For purposes of this class, a line ends
- * with "\n" or "\r\n". End of input is reported by throwing {@code EOFException}. Unterminated
- * line at end of input is invalid and will be ignored, the caller may use {@code
- * hasUnterminatedLine()} to detect it after catching the {@code EOFException}.
- *
- * <p>This class is intended for reading input that strictly consists of lines, such as line-based
- * cache entries or cache journal. Unlike the {@link java.io.BufferedReader} which in conjunction
- * with {@link java.io.InputStreamReader} provides similar functionality, this class uses different
- * end-of-input reporting and a more restrictive definition of a line.
- *
- * <p>This class supports only charsets that encode '\r' and '\n' as a single byte with value 13
- * and 10, respectively, and the representation of no other character contains these values.
- * We currently check in constructor that the charset is one of US-ASCII, UTF-8 and ISO-8859-1.
- * The default charset is US_ASCII.
- */
 class StrictLineReader implements Closeable {
   private static final byte CR = (byte) '\r';
   private static final byte LF = (byte) '\n';
