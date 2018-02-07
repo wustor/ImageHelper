@@ -24,10 +24,6 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile librarys["V7"]
-    compile librarys["constraint"]
-    compile librarys["junit"]
-    compile librarys["test"]
-    compile librarys["espresso"]
+    librarys.each { k, v -> compile v }
 }
 

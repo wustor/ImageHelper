@@ -22,6 +22,7 @@ ext {
             "constraint"  : "com.android.support.constraint:constraint-layout:1.0.2",
             "junit"       : "junit:junit:4.12",
             "test"        : "com.android.support.test:runner:0.5",
+            "okhttp-urlconnection": "com.squareup.okhttp:okhttp-urlconnection:2.5.0",
             "espresso"    : "com.android.support.test.espresso:espresso-core:2.2.2",
 
 

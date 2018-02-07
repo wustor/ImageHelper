@@ -9,6 +9,8 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.OkUrlFactory;
 import com.wustor.helper.cache.CacheManager;
 import com.wustor.helper.config.DisplayConfig;
 import com.wustor.helper.config.LoadListener;
@@ -23,15 +25,23 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 
 public class BitmapRequest implements Runnable {
     private String imageUrl;
     private Context mContext;
     private String imageUriMD5;
-    private DisplayConfig displayConfig;
-    private WeakReference<ImageView> imageViewSoft;
     private LoadListener loadListener;
+    private DisplayConfig displayConfig;
+    private static OkHttpClient mClient;
+    private WeakReference<ImageView> imageViewSoft;
+
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
 
@@ -82,9 +92,11 @@ public class BitmapRequest implements Runnable {
     private static boolean downloadImgByUrl(String urlStr, File file) {
         FileOutputStream fos = null;
         InputStream is = null;
+        initializeOkHttp();
         try {
-            URL url = new URL(urlStr);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            HttpURLConnection conn = new OkUrlFactory(mClient).open(new URL(urlStr));
+            conn.setConnectTimeout(15 * 3000);
+            conn.setReadTimeout(15 * 3000);
             int status = conn.getResponseCode();
             Log.d("code-------->", String.valueOf(status));
             is = conn.getInputStream();
@@ -114,7 +126,37 @@ public class BitmapRequest implements Runnable {
         return false;
 
     }
+    private static void initializeOkHttp() {
+        TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    @Override
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return new X509Certificate[0];
+                    }
 
+                    @Override
+                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                    }
+
+                    @Override
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                    }
+
+
+                }};
+
+        try {
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new SecureRandom());
+            mClient = new OkHttpClient();
+            mClient.setSslSocketFactory(sc.getSocketFactory());
+            mClient.setHostnameVerifier(new NullHostNameVerifier());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
     private File getCache(Context context) {
         String cachePath;
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) || !Environment.isExternalStorageRemovable()) {
